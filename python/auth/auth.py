@@ -1,1 +1,0 @@
-# Pending refactor Bluepring Names
