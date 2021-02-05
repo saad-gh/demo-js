@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}New Invoice{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+      <form method="post" onsubmit="disable_fields('invoice_fields')">
+        <div class="container-initial">
+          <div class="item-initial">
+            <label for="Contact">Contact</label>
+            {% if preserved is defined %}
+              <input name="Contact" id="Contact" value="{{ preserved.Contact }}" required>
+            {% else %}
+              <input name="Contact" id="Contact" value="" required>
+            {% endif %}
+          </div>
+          <div class="item-initial">
+            <label for="Date">Date</label>
+            {% if preserved is defined %}
+              <input name="Date" id="Date" type="Date" value="{{ preserved.Date }}" required>
+            {% else %}
+              <input name="Date" id="Date" type="Date" required>
+            {% endif %}            
+          </div>
+        </div>
+        <table name="invoice_table" id="invoice_table">
+          <thead>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Discount</th>
+            <th>Account</th>
+          </thead>
+          <tbody id="invoice_fields"></tbody>
+        </table>
+        <div class="container-end">
+        <div>
+          <button onclick="addrow(); return false;" style="width: 133px;">Add Row</button>
+        </div>
+        <div>
+          <input type="submit" value="Save">   
+        </div>
+        </div>    
+      </form>
+      <meta id="header-line-items" data-name="{{ preserved.LINEITEMS }}">
+      <script>
+        var invoice_table = document.querySelector("#invoice_table > tbody")
+        var headers = JSON.parse(document.querySelector("#header-line-items").dataset.name.split("'").join('"'));
+        var n_fields = headers.length;
+        var t_fields = [headers.indexOf("Description")]; // text fields
+        var f_act = headers.indexOf("Description"); // For activating line item
+        var f_acc = headers.indexOf("AccountCode"); // For setting default value
+
+        // Initializing with 5 rows
+        addrow();
+        addrow();
+        addrow();
+        addrow();
+        addrow();
+
+        function addrow(){
+          var rowsold = document.querySelectorAll("#invoice_fields > tr");
+          var pos  = rowsold.length;
+          var rownew = invoice_table.insertRow(pos);
+          addcells(pos,rownew);
+        }
+
+        function addcells(pos, row){
+          for(var i=0; i < n_fields; i++){
+            var cell = row.insertCell(i);
+            var id = pos.toString()+ "_" + i.toString()
+            cell.innerHTML = "<input type="
+            + (t_fields.indexOf(i) !== -1 ? "text" : "number")
+            + (i == f_act ? ' onfocusout="update_required_fields(this); return false;"' : "")
+            + " id="
+            + id
+            + " name="
+            + id
+            + (i == f_acc ? ' value="200" readonly ' : "")
+            + ">" 
+          }
+        }
+
+        function update_required_fields(item){          
+          var row = parseInt(item.id.split("_")[0]);
+          var [item_cell,...cells] = document.querySelectorAll("#invoice_fields > tr:nth-child(" + (row + 1) + ") > td > input");
+    
+          if(item.value != ""){            
+            cells.forEach((input,i) => input.required = true);
+          } else {
+            cells.forEach((input,i) => input.required = false);
+          }
+        }
+
+        function disable_fields(id){
+          let field_table = document.getElementById(id);
+          let rows = field_table.querySelectorAll("tr");
+          rows = Array.from(rows).filter((row) => row.querySelector("td:nth-child(" + (f_act + 1) + ") > input").value == "");
+          rows.map((row) => row.querySelectorAll("td > input").forEach((i) => i.disabled = true));
+        }
+      </script>
+{% endblock %}
