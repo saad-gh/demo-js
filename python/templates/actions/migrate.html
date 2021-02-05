@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Sage to Xero{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="post">
+        <div class="container-initial">
+            <div class="item-initial">
+                <label for="from">From</label>
+                <input name="from" id="from" type="Date" required>           
+            </div>
+            <div class="item-initial">
+                <label for="to">To</label>
+                <input name="to" id="to" type="Date" required>           
+            </div>
+            <div class="item-initial">
+                <label for="t_id">Tenant</label>
+                <select name="t_id" id="t_id">
+                    {% for _ in t_ids %}
+                    <option value="{{ _['tenantId'] }}">{{ _['tenantName'] }}</option>
+                    {% endfor %}
+                </select>           
+            </div>
+        </div>
+        {% with test_success = get_flashed_messages(category_filter=["error_currencies"]) %}
+        {% if test_success %}
+            <ul id="unmappedcodes" style="display: none;">    
+                {%- for msg in test_success %}
+                <li>{{ msg }}</li>      
+                {% endfor -%}
+            </ul>
+            <div id="mapcodes" class="flash"></div>
+        {% else %}
+            <div class="container-end">
+                <div>
+                    <input type="submit" value="Sage to Xero">   
+                </div>
+            </div>
+        {% endif %}
+        {% endwith %}
+    </form>
+    <ul>
+        {% for _ in f %}
+        <li><a href="{{ url_for('act_xero.download',filename=_) }}">{{ _ }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+{% block reactscript %}
+    <!-- Load React -->
+    <script src="{{ url_for('static', filename='react/available_codes.js') }}"></script>
+{% endblock %}

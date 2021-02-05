@@ -1,0 +1,8 @@
+#mapcodes > div > * {
+    margin: 0;
+    margin-right: 10px;
+}
+
+#mapcodes > div > select {
+    height: 22px;
+}
